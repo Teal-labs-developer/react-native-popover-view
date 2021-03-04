@@ -724,6 +724,18 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
     });
   }
 
+  getArrowShadowStyle() {
+    const { arrowStyle } = this.props;
+    const {shadowColor, shadowOffset, shadowOpacity, shadowRadius, elevation} = StyleSheet.flatten(arrowStyle);
+    return {
+      shadowColor,
+      shadowOpacity,
+      shadowOffset,
+      shadowRadius,
+      elevation
+    }
+  }
+
   getArrowDynamicStyle() {
     const { placement } = this.getGeom();
     const { arrowStyle, popoverStyle } = this.props;
@@ -994,6 +1006,8 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
       this.getArrowDynamicStyle()
     ];
 
+    const arrowShadowStyle = this.getArrowShadowStyle()
+
     // Temp fix for useNativeDriver issue
     const backgroundShift = animatedValues.fade.interpolate({
       inputRange: [0, 0.0001, 1],
@@ -1055,7 +1069,7 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
             </Animated.View>
 
             {geom.placement !== Placement.CENTER &&
-              <Animated.View style={arrowViewStyle} ref={this.arrowRef}>
+              <Animated.View style={[arrowViewStyle, arrowShadowStyle]} ref={this.arrowRef}>
                 <Animated.View style={arrowInnerStyle} />
               </Animated.View>
             }
