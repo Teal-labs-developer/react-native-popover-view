@@ -726,13 +726,14 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
 
   getArrowShadowStyle() {
     const { arrowStyle } = this.props;
-    const {shadowColor, shadowOffset, shadowOpacity, shadowRadius, elevation} = StyleSheet.flatten(arrowStyle);
+    const {shadowColor, shadowOffset, shadowOpacity, shadowRadius, elevation, borderWidth} = StyleSheet.flatten(arrowStyle);
     return {
       shadowColor,
       shadowOpacity,
       shadowOffset,
       shadowRadius,
-      elevation
+      elevation,
+      borderWidth
     }
   }
 
