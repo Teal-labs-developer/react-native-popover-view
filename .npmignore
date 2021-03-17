@@ -26,11 +26,6 @@ DerivedData
 node_modules/
 npm-debug.log
 
-# image files
-*.gif
-*.jpg
-*.png
-
 # assorted non-permanent files
 *.swp
 coverage/
