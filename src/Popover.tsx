@@ -17,7 +17,8 @@ import {
   StyleSheet,
   I18nManager,
   EasingFunction,
-  LayoutChangeEvent
+  LayoutChangeEvent,
+  Image
 } from 'react-native';
 import { Rect, Point, Size, getRectForRef, getArrowSize, getBorderRadius } from './Utility';
 import { MULTIPLE_POPOVER_WARNING, Placement, Mode, DEFAULT_BORDER_RADIUS, FIX_SHIFT as ORIGINAL_FIX_SHIFT } from './Constants';
@@ -744,17 +745,22 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
 
     const backgroundColor = StyleSheet.flatten(arrowStyle).backgroundColor || StyleSheet.flatten(popoverStyle).backgroundColor || styles.popoverContent.backgroundColor;
     let colors = {};
+    let rotate = ""
     switch (placement) {
       case Placement.TOP:
+        rotate = "180deg"
         colors = { borderTopColor: backgroundColor };
         break;
       case Placement.BOTTOM:
+        rotate = "0deg"
         colors = { borderBottomColor: backgroundColor };
         break;
       case Placement.LEFT:
+        rotate = "90deg"
         colors = { borderLeftColor: backgroundColor };
         break;
       case Placement.RIGHT:
+        rotate = "270deg"
         colors = { borderRightColor: backgroundColor };
         break;
       default:
@@ -771,6 +777,7 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
       borderRightWidth: width / 2,
       borderBottomWidth: height / 2,
       borderLeftWidth: width / 2,
+      rotate,
       ...colors
     }
   }
@@ -1041,6 +1048,9 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
       ]
     };
 
+    const rotate = arrowInnerStyle[1].rotate || "0deg";
+    const elevation = arrowShadowStyle.elevation || 50;
+
     // We want to always use next here, because the we need this to re-render before we can animate to the correct spot for the active.
     if (nextGeom) {
       popoverViewStyle.maxWidth = ((nextGeom as Geometry).forcedContentSize || { width: null }).width || undefined;
@@ -1062,17 +1072,30 @@ class BasePopover extends Component<BasePopoverProps, BasePopoverState> {
 
           <View pointerEvents="box-none" style={{top: 0, left: 0}}>
             
-            <Animated.View style={popoverViewStyle} ref={this.popoverRef} onLayout={(evt: LayoutChangeEvent) => {
+            <Animated.View style={[popoverViewStyle]} ref={this.popoverRef} onLayout={(evt: LayoutChangeEvent) => {
               const layout = { ...evt.nativeEvent.layout };
               setTimeout(() => this._isMounted && this.measureContent(layout), 10);
             }}>
               {this.props.children}
             </Animated.View>
 
-            {geom.placement !== Placement.CENTER &&
-              <Animated.View style={[arrowViewStyle, arrowShadowStyle]} ref={this.arrowRef}>
-                <Animated.View style={arrowInnerStyle} />
-              </Animated.View>
+            {Platform.OS === "ios" ? 
+              geom.placement !== Placement.CENTER && 
+                <Animated.View style={[arrowViewStyle, arrowShadowStyle]} ref={this.arrowRef}>
+                  <Animated.View style={arrowInnerStyle} />
+                </Animated.View>
+            :
+
+              geom.placement === Placement.TOP || geom.placement === Placement.LEFT ? 
+                  <Animated.View style={[arrowViewStyle, arrowShadowStyle]} ref={this.arrowRef}>
+                    <Animated.View style={arrowInnerStyle} />
+                  </Animated.View>
+              :
+                geom.placement !== Placement.CENTER && 
+                <Animated.View style={[arrowViewStyle, {elevation},
+                  geom.placement === Placement.RIGHT ? {justifyContent: "center",alignItems: "flex-start"} : {justifyContent: "flex-end",alignItems: "center"}]} ref={this.arrowRef}>
+                    <Image style={[styles.image,{transform: [{rotate: rotate}]}]} source={require("./upArrowShadow.png")}/>
+                </Animated.View>
             }
           </View>
         </Animated.View>
@@ -1127,6 +1150,10 @@ const styles = StyleSheet.create({
     borderRightColor: 'transparent',
     borderBottomColor: 'transparent',
     borderLeftColor: 'transparent'
+  },
+  image: {
+    width:40,
+    height:20
   }
 });
 
